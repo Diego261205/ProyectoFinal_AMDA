@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f9; /* Blanco grisáceo muy claro */
+    margin: 0;
+    padding: 0;
+}
+
+.login-container {
+    width: 350px;
+    margin: 100px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-top: 5px solid #004a99; /* Azul AMDA */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+h2 {
+    color: #004a99;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* Para que el padding no ensanche el input */
+}
+
+input[type="submit"] {
+    background-color: #004a99;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #003366;
+}
+
+.logo {
+    width: 150px;
+    margin-bottom: 20px;
+}
