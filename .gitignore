@@ -1,0 +1,10 @@
+# NetBeans build output and private config
+build/
+nbproject/private/
+
+# Local environment variables
+.env
+
+# Backups
+*.properties.bak
+*.bak
