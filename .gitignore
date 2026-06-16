@@ -1,0 +1,21 @@
+# NetBeans build output and private config
+build/
+nbproject/private/
+
+# Local environment variables
+.env
+
+# Backups
+*.properties.bak
+*.bak
+
+# Build artifacts
+dist/
+
+# Tooling
+.agents/
+skills-lock.json
+
+# Claude internal files
+.claude/
+PRODUCT.md

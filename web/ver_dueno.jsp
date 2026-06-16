@@ -1,59 +1,75 @@
 <%@page import="java.sql.*, modelo.Conexion"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    if (session.getAttribute("usuarioLogueado") == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
-<html>
+<html lang="es-MX">
     <head>
-        <title>AMDA - Detalle del Dueño</title>
-        <link rel="stylesheet" href="style.css">
-        <style>
-            .ficha-container { width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-            .dato { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-            .etiqueta { font-weight: bold; color: #004a99; display: block; font-size: 0.9em; }
-            .valor { font-size: 1.1em; color: #333; }
-        </style>
+        <title>AMDA - Datos del Propietario</title>
+        <link rel="stylesheet" href="style.css?v=14">
+        <!-- Font Awesome para Iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body>
-        <div class="ficha-container">
-            <h2 style="color: #004a99; text-align: center; border-bottom: 2px solid #004a99; padding-bottom: 10px;">Expediente del Propietario</h2>
-            <%
-                int idD = Integer.parseInt(request.getParameter("id"));
-                try {
-                    Connection cn = Conexion.conectar();
-                    String sql = "SELECT * FROM duenos WHERE id_dueno = ?";
-                    PreparedStatement ps = cn.prepareStatement(sql);
-                    ps.setInt(1, idD);
-                    ResultSet rs = ps.executeQuery();
-                    if(rs.next()){
-            %>
-            <div class="dato">
-                <span class="etiqueta">Nombre Completo:</span>
-                <span class="valor"><%= rs.getString("nombre_completo") %></span>
+        <header class="main-header">
+            <h1><i class="fa-solid fa-car-side"></i> AMDA - Control de Servicios</h1>
+            <div>
+                Bienvenido, <strong><%= session.getAttribute("usuarioLogueado") %></strong> |
+                <a href="index.jsp" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
             </div>
-            <div class="dato">
-                <span class="etiqueta">Edad:</span>
-                <span class="valor"><%= rs.getInt("edad") %> años</span>
-            </div>
-            <div class="dato">
-                <span class="etiqueta">Fecha de Nacimiento:</span>
-                <span class="valor"><%= rs.getDate("fecha_nacimiento") %></span>
-            </div>
-            <div class="dato">
-                <span class="etiqueta">Teléfono de Contacto:</span>
-                <span class="valor"><%= rs.getString("telefono") %></span>
-            </div>
-            <div class="dato">
-                <span class="etiqueta">Domicilio Registrado:</span>
-                <span class="valor"><%= rs.getString("domicilio") %></span>
-            </div>
-            
-            <div style="text-align: center; margin-top: 25px;">
-                <a href="dashboard.jsp" style="background-color: #004a99; color: white; padding: 10px 25px; text-decoration: none; border-radius: 5px;">Volver al Panel</a>
-            </div>
-            <%
+        </header>
+
+        <main class="content-container">
+            <div class="ficha-container">
+                <h2><i class="fa-solid fa-user" aria-hidden="true"></i> Datos del Propietario</h2>
+                <%
+                    int ownerId = Integer.parseInt(request.getParameter("id"));
+                    Connection cn = null;
+                    PreparedStatement ps = null;
+                    ResultSet rs = null;
+                    try {
+                        cn = Conexion.conectar();
+                        String sql = "SELECT * FROM duenos WHERE id_dueno = ?";
+                        ps = cn.prepareStatement(sql);
+                        ps.setInt(1, ownerId);
+                        rs = ps.executeQuery();
+                        if(rs.next()){
+                %>
+                <div class="dato">
+                    <span class="etiqueta"><i class="fa-solid fa-signature"></i> Nombre Completo:</span>
+                    <span class="valor"><%= rs.getString("nombre_completo") %></span>
+                </div>
+                <div class="dato">
+                    <span class="etiqueta"><i class="fa-solid fa-calendar-days"></i> Fecha de Nacimiento:</span>
+                    <span class="valor"><%= rs.getDate("fecha_nacimiento") %></span>
+                </div>
+                <div class="dato">
+                    <span class="etiqueta"><i class="fa-solid fa-phone"></i> Teléfono:</span>
+                    <span class="valor"><%= rs.getString("telefono") %></span>
+                </div>
+                <div class="dato">
+                    <span class="etiqueta"><i class="fa-solid fa-location-dot"></i> Domicilio:</span>
+                    <span class="valor"><%= rs.getString("domicilio") %></span>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="dashboard.jsp" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Volver al Panel</a>
+                </div>
+                <%
+                        }
+                    } catch(Exception e) {
+                        out.print("<p style='color:var(--warning-text);'><i class='fa-solid fa-triangle-exclamation'></i> Ocurrió un error al cargar los datos. Intenta de nuevo.</p>");
+                    } finally {
+                        if (rs != null) try { rs.close(); } catch(SQLException ex) {}
+                        if (ps != null) try { ps.close(); } catch(SQLException ex) {}
+                        if (cn != null) try { cn.close(); } catch(SQLException ex) {}
                     }
-                    cn.close();
-                } catch(Exception e) { out.print("Error: " + e.getMessage()); }
-            %>
-        </div>
+                %>
+            </div>
+        </main>
     </body>
 </html>
