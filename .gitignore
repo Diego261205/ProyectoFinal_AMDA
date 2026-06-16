@@ -8,3 +8,10 @@ nbproject/private/
 # Backups
 *.properties.bak
 *.bak
+
+# Build artifacts
+dist/
+
+# Tooling
+.agents/
+skills-lock.json
