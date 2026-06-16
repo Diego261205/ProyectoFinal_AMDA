@@ -1,42 +1,88 @@
-# Prueba1Proyecto (Proyecto Villegas)
+# AMDA Gestor de Servicios (Proyecto Villegas)
 
-Este es un proyecto de aplicación web en Java (JSP/Servlets). 
+Aplicación web en Java (JSP/Servlets) para gestión de servicios vehiculares AMDA.
 
 ## Requisitos previos
 
-- **Java JDK** (versión recomendada: 8 o superior).
-- **Servidor de Aplicaciones:** Apache Tomcat o GlassFish.
-- **Base de Datos:** MariaDB o MySQL.
-- **Apache Ant** (si deseas compilar desde la terminal sin NetBeans).
+- **Java JDK 8** o superior
+- **Apache Tomcat 8+**
+- **MariaDB / MySQL**
+- **Apache NetBeans** (recomendado) o Apache Ant para compilar sin IDE
 
-## Configuración de la Base de Datos
+## Configuración inicial
 
-1. Asegúrate de tener tu servidor de base de datos MySQL/MariaDB en ejecución.
-2. Ejecuta el script `database_setup.sql` incluido en la raíz de este proyecto para crear las tablas necesarias y agregar los datos de prueba.
-3. Si cambias las credenciales por defecto (usuario/contraseña), asegúrate de actualizar la conexión en el código de la aplicación.
+### 1. Base de datos
+
+Ejecuta el script incluido para crear las tablas:
+
+```bash
+mysql -u root -p < database_setup.sql
+```
+
+La columna `usuarios.password` debe ser `VARCHAR(60)` para almacenar hashes BCrypt:
+
+```sql
+ALTER TABLE usuarios MODIFY COLUMN password VARCHAR(60) NOT NULL;
+```
+
+### 2. Variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto (nunca se sube al repo):
+
+```
+DB_URL=jdbc:mariadb://localhost:3307/amda_db
+DB_USER=root
+DB_PASS=tu_contraseña
+```
+
+La clase `modelo.Env` carga estas variables al iniciar. No hay credenciales hardcodeadas en el código.
+
+### 3. Contraseñas (BCrypt)
+
+Las contraseñas se almacenan con hash BCrypt (factor 12). Para crear un usuario inicial:
+
+```java
+// Compila HashGen.java con jbcrypt-0.4.jar en el classpath,
+// corre el main y usa el hash generado en el INSERT de usuarios.
+```
+
+## Dependencias externas
+
+| JAR | Ubicación en Tomcat |
+|-----|-------------------|
+| `mariadb-java-client-*.jar` | `WEB-INF/lib/` |
+| `jbcrypt-0.4.jar` | `WEB-INF/lib/` |
+
+Ambos JARs deben estar en `WEB-INF/lib/` del WAR desplegado. Reiniciar Tomcat tras agregar nuevos JARs.
 
 ---
 
-## Cómo ejecutar el proyecto usando Apache NetBeans (Recomendado)
+## Ejecutar con NetBeans (recomendado)
 
-1. Abre Apache NetBeans.
-2. Ve a **File > Open Project...** (Archivo > Abrir Proyecto...).
-3. Navega hasta la carpeta de este proyecto (`Proyecto Villegas`) y selecciónala.
-4. Asegúrate de tener un servidor configurado en NetBeans (como Tomcat o GlassFish) en **Services > Servers**.
-5. Haz clic derecho sobre el proyecto en la pestaña *Projects* y selecciona **Run** (Ejecutar). NetBeans se encargará de compilar, empaquetar y desplegar el proyecto, para luego abrirlo en tu navegador predeterminado.
+1. **File > Open Project** → selecciona la carpeta `Proyecto Villegas`
+2. Configura Tomcat en **Services > Servers**
+3. Clic derecho en el proyecto → **Run**
+
+NetBeans compila, empaqueta y despliega automáticamente.
 
 ---
 
-## Cómo ejecutar el proyecto SIN NetBeans (Usando Apache Ant y Tomcat)
+## Ejecutar sin NetBeans (Ant + Tomcat manual)
 
-Si prefieres usar la terminal, este proyecto utiliza Apache Ant para su construcción.
+```bash
+ant clean dist
+```
 
-1. Abre una terminal (o Símbolo del Sistema) y navega a la carpeta raíz del proyecto.
-2. Ejecuta el siguiente comando para limpiar y construir el proyecto:
-   ```bash
-   ant clean dist
-   ```
-3. Una vez finalizado el proceso, se habrá generado un archivo `.war` dentro de la carpeta `dist/`.
-4. Copia ese archivo `.war` y pégalo dentro de la carpeta `webapps/` de tu instalación de Apache Tomcat.
-5. Inicia tu servidor Tomcat (ejecutando `catalina.bat run` en Windows o `catalina.sh run` en Linux/Mac).
-6. Ingresa desde tu navegador a `http://localhost:8080/NombreDelWar` (reemplazando `NombreDelWar` por el nombre real del archivo sin la extensión .war).
+Copia el `.war` generado en `dist/` a la carpeta `webapps/` de Tomcat, luego:
+
+```bash
+# Windows
+catalina.bat run
+
+# Linux/Mac
+catalina.sh run
+```
+
+Accede en: `http://localhost:8080/NombreDelWar`
+
+> **Nota:** el build de Ant requiere ajustar las rutas de librerías en `nbproject/project.properties` a tu entorno local.
