@@ -27,7 +27,7 @@
             <div class="ficha-container">
                 <h2><i class="fa-solid fa-user" aria-hidden="true"></i> Datos del Propietario</h2>
                 <%
-                    int idD = Integer.parseInt(request.getParameter("id"));
+                    int ownerId = Integer.parseInt(request.getParameter("id"));
                     Connection cn = null;
                     PreparedStatement ps = null;
                     ResultSet rs = null;
@@ -35,7 +35,7 @@
                         cn = Conexion.conectar();
                         String sql = "SELECT * FROM duenos WHERE id_dueno = ?";
                         ps = cn.prepareStatement(sql);
-                        ps.setInt(1, idD);
+                        ps.setInt(1, ownerId);
                         rs = ps.executeQuery();
                         if(rs.next()){
                 %>

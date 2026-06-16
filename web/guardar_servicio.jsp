@@ -9,66 +9,88 @@
 %>
 <%
     // 1. Datos del Dueño (Titular legal)
-    String nombreD = request.getParameter("nombre_dueno");
+    String ownerName = request.getParameter("nombre_dueno");
     int edad = 0;
-    String nacimiento = request.getParameter("nacimiento");
-    String telefono = request.getParameter("telefono");
-    String domicilio = request.getParameter("domicilio");
+    String birthDate = request.getParameter("nacimiento");
+    String phone = request.getParameter("telefono");
+    String address = request.getParameter("domicilio");
 
     // 2. Datos del Servicio y Cliente (Agencia)
-    String clienteSolicita = request.getParameter("cliente_solicita"); // NUEVO
-    String tipoMov = request.getParameter("tipo_movimiento");
+    String clientRequest = request.getParameter("cliente_solicita");
+    String movType = request.getParameter("tipo_movimiento");
     String marca = request.getParameter("marca");
     String modelo = request.getParameter("modelo");
     String vin = request.getParameter("vin");
-    String tipoPlaca = request.getParameter("tipo_placa");
-    double importe = Double.parseDouble(request.getParameter("importe"));
+    String plateType = request.getParameter("tipo_placa");
+    double amount = Double.parseDouble(request.getParameter("importe"));
 
     Connection cn = null;
-    PreparedStatement psD = null;
-    PreparedStatement psS = null;
+    PreparedStatement psOwner = null;
+    PreparedStatement psService = null;
     ResultSet rsKeys = null;
     try {
         cn = Conexion.conectar();
         cn.setAutoCommit(false);
 
         // PASO A: Insertar Dueño
-        String sqlDueno = "INSERT INTO duenos (nombre_completo, edad, fecha_nacimiento, telefono, domicilio) VALUES (?, ?, ?, ?, ?)";
-        psD = cn.prepareStatement(sqlDueno, Statement.RETURN_GENERATED_KEYS);
-        psD.setString(1, nombreD);
-        psD.setInt(2, edad);
-        psD.setString(3, nacimiento);
-        psD.setString(4, telefono);
-        psD.setString(5, domicilio);
-        psD.executeUpdate();
+        String sqlOwner = "INSERT INTO duenos (nombre_completo, edad, fecha_nacimiento, telefono, domicilio) VALUES (?, ?, ?, ?, ?)";
+        psOwner = cn.prepareStatement(sqlOwner, Statement.RETURN_GENERATED_KEYS);
+        psOwner.setString(1, ownerName);
+        psOwner.setInt(2, edad);
+        psOwner.setString(3, birthDate);
+        psOwner.setString(4, phone);
+        psOwner.setString(5, address);
+        psOwner.executeUpdate();
 
-        rsKeys = psD.getGeneratedKeys();
-        int idGenerado = 0;
-        if (rsKeys.next()) idGenerado = rsKeys.getInt(1);
+        rsKeys = psOwner.getGeneratedKeys();
+        int generatedId = 0;
+        if (rsKeys.next()) {
+            generatedId = rsKeys.getInt(1);
+        }
 
-        // PASO B: Insertar Servicio (Usando clienteSolicita en cliente_nombre)
-        String sqlServicio = "INSERT INTO servicios (tipo_movimiento, marca, modelo, vin, tipo_placa, fecha_tramite, importe, cliente_nombre, id_dueno) VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, ?)";
-        psS = cn.prepareStatement(sqlServicio);
-        psS.setString(1, tipoMov);
-        psS.setString(2, marca);
-        psS.setString(3, modelo);
-        psS.setString(4, vin);
-        psS.setString(5, tipoPlaca);
-        psS.setDouble(6, importe);
-        psS.setString(7, clienteSolicita); // Aquí guardamos la Agencia
-        psS.setInt(8, idGenerado);
-        
-        psS.executeUpdate();
+        // PASO B: Insertar Servicio (Usando clientRequest en cliente_nombre)
+        String sqlService = "INSERT INTO servicios (tipo_movimiento, marca, modelo, vin, tipo_placa, fecha_tramite, importe, cliente_nombre, id_dueno) VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, ?)";
+        psService = cn.prepareStatement(sqlService);
+        psService.setString(1, movType);
+        psService.setString(2, marca);
+        psService.setString(3, modelo);
+        psService.setString(4, vin);
+        psService.setString(5, plateType);
+        psService.setDouble(6, amount);
+        psService.setString(7, clientRequest);
+        psService.setInt(8, generatedId);
+
+        psService.executeUpdate();
         cn.commit();
-        
+
         out.print("<script>alert('Registro guardado exitosamente'); window.location='dashboard.jsp';</script>");
     } catch (Exception e) {
-        if (cn != null) try { cn.rollback(); } catch(SQLException ex) {}
-        out.print("Error: " + e.getMessage());
+        if (cn != null) {
+            try {
+                cn.rollback();
+            } catch (SQLException ex) {}
+        }
+        out.print("Ocurrió un error interno. Contacte al administrador.");
     } finally {
-        if (rsKeys != null) try { rsKeys.close(); } catch(SQLException ex) {}
-        if (psD != null) try { psD.close(); } catch(SQLException ex) {}
-        if (psS != null) try { psS.close(); } catch(SQLException ex) {}
-        if (cn != null) try { cn.close(); } catch(SQLException ex) {}
+        if (rsKeys != null) {
+            try {
+                rsKeys.close();
+            } catch (SQLException ex) {}
+        }
+        if (psOwner != null) {
+            try {
+                psOwner.close();
+            } catch (SQLException ex) {}
+        }
+        if (psService != null) {
+            try {
+                psService.close();
+            } catch (SQLException ex) {}
+        }
+        if (cn != null) {
+            try {
+                cn.close();
+            } catch (SQLException ex) {}
+        }
     }
 %>

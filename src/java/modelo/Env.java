@@ -6,6 +6,10 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Loads and exposes environment variables from the project's .env file,
+ * falling back to system environment variables when a key is not found.
+ */
 public class Env {
     private static Map<String, String> envMap = new HashMap<>();
 
@@ -24,13 +28,20 @@ public class Env {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("Error al leer archivo .env: " + e.getMessage());
+                System.err.println("Error al cargar configuración del entorno.");
             }
         }
     }
 
+
+    /**
+     * Returns the value associated with the given key, checking the .env file
+     * first and then falling back to system environment variables.
+     *
+     * @param key the name of the environment variable to look up
+     * @return the value, or an empty string if the key is not found
+     */
     public static String get(String key) {
-        // Busca en el archivo .env primero, y si no, en las variables del sistema
         String value = envMap.get(key);
         if (value == null) {
             value = System.getenv(key);

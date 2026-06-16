@@ -25,11 +25,13 @@
 
         <main class="content-container">
             <%
-                String buscar = request.getParameter("txtBuscar");
-                String filtro = request.getParameter("filtro");
-                if (filtro == null) filtro = "todos";
+                String searchQuery = request.getParameter("txtBuscar");
+                String filter = request.getParameter("filtro");
+                if (filter == null) {
+                    filter = "todos";
+                }
             %>
-            
+
             <div class="filter-bar" style="display: flex; flex-direction: column; gap: 16px; align-items: stretch;">
                 <!-- Fila 1: Botones de Acción y Filtros de Estatus -->
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
@@ -44,16 +46,16 @@
 
                     <div class="filter-group">
                         <span style="font-weight: bold; color: var(--text-muted);">Mostrar:</span>
-                        <a href="dashboard.jsp?filtro=todos" 
-                           class="filter-pill <%= "todos".equals(filtro) ? "active todos" : "" %>">
+                        <a href="dashboard.jsp?filtro=todos"
+                           class="filter-pill <%= "todos".equals(filter) ? "active todos" : "" %>">
                            <i class="fa-solid fa-list"></i> Ver Todos
                         </a>
-                        <a href="dashboard.jsp?filtro=pendientes" 
-                           class="filter-pill <%= "pendientes".equals(filtro) ? "active pendientes" : "" %>">
+                        <a href="dashboard.jsp?filtro=pendientes"
+                           class="filter-pill <%= "pendientes".equals(filter) ? "active pendientes" : "" %>">
                            <i class="fa-solid fa-circle-exclamation"></i> Pendientes
                         </a>
-                        <a href="dashboard.jsp?filtro=pagados" 
-                           class="filter-pill <%= "pagados".equals(filtro) ? "active pagados" : "" %>">
+                        <a href="dashboard.jsp?filtro=pagados"
+                           class="filter-pill <%= "pagados".equals(filter) ? "active pagados" : "" %>">
                            <i class="fa-solid fa-circle-check"></i> Pagados
                         </a>
                     </div>
@@ -66,7 +68,7 @@
                 <div class="dashboard-controls-row">
                     <!-- Buscador en tiempo real -->
                     <div class="search-wrapper">
-                        <input type="text" id="txtBuscar" oninput="filterTableDebounced();" class="search-input-dashboard" placeholder="Buscar por nombre, VIN, agencia..." value="<%= (buscar!=null) ? buscar : "" %>">
+                        <input type="text" id="txtBuscar" oninput="filterTableDebounced();" class="search-input-dashboard" placeholder="Buscar por nombre, VIN, agencia..." value="<%= (searchQuery!=null) ? searchQuery : "" %>">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
 
@@ -140,10 +142,10 @@
                             try {
                                 cn = Conexion.conectar();
                                 String sql = "SELECT s.*, d.nombre_completo FROM servicios s JOIN duenos d ON s.id_dueno = d.id_dueno WHERE 1=1";
-                                
-                                if (filtro.equals("pendientes")) {
+
+                                if (filter.equals("pendientes")) {
                                     sql += " AND s.pagado = FALSE";
-                                } else if (filtro.equals("pagados")) {
+                                } else if (filter.equals("pagados")) {
                                     sql += " AND s.pagado = TRUE";
                                 }
                                 sql += " ORDER BY s.id_servicio DESC";
@@ -151,7 +153,7 @@
                                 ps = cn.prepareStatement(sql);
                                 rs = ps.executeQuery();
                                 while(rs.next()) {
-                                    boolean pagado = rs.getBoolean("pagado");
+                                    boolean isPaid = rs.getBoolean("pagado");
                         %>
                         <tr>
                             <td class="col-id" style="white-space: nowrap;"><%= rs.getInt("id_servicio") %></td>
@@ -171,7 +173,7 @@
                                 <%= agencyName %>
                             </td>
                             <td style="white-space: nowrap;">
-                                <% if(pagado) { %>
+                                <% if(isPaid) { %>
                                     <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Pagado</span>
                                 <% } else { %>
                                     <span class="badge badge-warning"><i class="fa-solid fa-circle-exclamation"></i> Pendiente</span>
@@ -191,14 +193,20 @@
                                 </div>
                             </td>
                         </tr>
-                        <% 
+                        <%
                                 }
                             } catch(Exception e) {
                                 out.print("<tr><td colspan='10' style='text-align:center;padding:30px;color:var(--warning-text);'><i class='fa-solid fa-triangle-exclamation'></i> Ocurrió un error al cargar los registros. Recarga la página o contacta al administrador.</td></tr>");
                             } finally {
-                                if (rs != null) try { rs.close(); } catch(SQLException ex) {}
-                                if (ps != null) try { ps.close(); } catch(SQLException ex) {}
-                                if (cn != null) try { cn.close(); } catch(SQLException ex) {}
+                                if (rs != null) {
+                                    try { rs.close(); } catch(SQLException ex) {}
+                                }
+                                if (ps != null) {
+                                    try { ps.close(); } catch(SQLException ex) {}
+                                }
+                                if (cn != null) {
+                                    try { cn.close(); } catch(SQLException ex) {}
+                                }
                             }
                         %>
                     </tbody>
@@ -235,9 +243,9 @@
                     const placa = row.cells[4].textContent.toLowerCase();
                     const fecha = row.cells[5].textContent.toLowerCase();
                     const clienteAgencia = row.cells[7].textContent.trim(); // agency name
-                    
+
                     // Comprobar coincidencia de búsqueda (searchQuery)
-                    const matchesSearch = searchQuery === "" || 
+                    const matchesSearch = searchQuery === "" ||
                         id.includes(searchQuery) ||
                         movimiento.toLowerCase().includes(searchQuery) ||
                         vehiculo.includes(searchQuery) ||
