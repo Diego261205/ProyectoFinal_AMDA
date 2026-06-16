@@ -15,3 +15,7 @@ dist/
 # Tooling
 .agents/
 skills-lock.json
+
+# Claude internal files
+.claude/
+PRODUCT.md
